@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TEC PROCESS — Water Intelligence Platform</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Font Inter & Cairo -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Cairo', 'Inter', sans-serif; }
+        .font-mono-num { font-family: 'Inter', monospace; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased">
+
+    <!-- Header / Navigation -->
+    <header class="bg-slate-900/90 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="p-2.5 bg-blue-600/20 border border-blue-500/30 rounded-xl text-blue-400">
+                    <i data-lucide="waves" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="font-bold text-base sm:text-lg text-white tracking-wide">TEC PROCESS</h1>
+                        <span class="text-xs px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-400 font-semibold border border-blue-500/20">Water Intelligence</span>
+                    </div>
+                    <p class="text-xs text-slate-400" id="txt-subtitle">المنصة التحليلية المستقلة لمراقبة محطات تحلية مياه البحر بالجزائر</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <div class="flex items-center bg-slate-800 border border-slate-700 rounded-lg p-1 text-xs">
+                    <button onclick="setLanguage('ar')" id="lang-ar" class="px-2.5 py-1 rounded-md transition font-medium bg-blue-600 text-white">العربية</button>
+                    <button onclick="setLanguage('fr')" id="lang-fr" class="px-2.5 py-1 rounded-md transition font-medium text-slate-400 hover:text-white">Français</button>
+                    <button onclick="setLanguage('en')" id="lang-en" class="px-2.5 py-1 rounded-md transition font-medium text-slate-400 hover:text-white">English</button>
+                </div>
+
+                <div class="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span id="txt-sys-active">بيانات معتمدة (2026)</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+        <!-- Banner Label Startup Note -->
+        <div class="bg-gradient-to-r from-blue-950/60 to-slate-900 border border-blue-500/30 rounded-xl p-4 flex items-start sm:items-center gap-3 text-xs sm:text-sm text-slate-300">
+            <i data-lucide="info" class="w-5 h-5 text-blue-400 shrink-0 mt-0.5 sm:mt-0"></i>
+            <div>
+                <strong class="text-white" id="txt-disclaimer-title">مشروع نموذج أولي (Prototype Label Startup):</strong>
+                <span id="txt-disclaimer-body"> هذه المنصة هي أداة رقمية تحليلية نمطية لتجميع ومقارنة مؤشرات أداء المحطات الوطنية بناءً على سجلات الوكالة الوطنية لتحلية مياه البحر، ومعدة للعرض الفني.</span>
+            </div>
+        </div>
+
+        <!-- Dynamic KPI Metric Cards -->
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-5 relative overflow-hidden">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-slate-400 text-xs font-semibold uppercase tracking-wider" id="lbl-kpi-total">الطاقة التشغيلية الإجمالية</span>
+                    <div class="p-2 bg-blue-500/10 text-blue-400 rounded-lg"><i data-lucide="activity" class="w-4 h-4"></i></div>
+                </div>
+                <div class="text-2xl font-bold text-white font-mono-num" id="kpi-total-capacity">0 <span class="text-sm font-sans text-slate-400">م³/يوم</span></div>
+                <p class="text-xs text-slate-400 mt-2" id="sub-kpi-total">محسوبة تلقائياً من سجلات الوكالة</p>
+            </div>
+
+            <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-5">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-slate-400 text-xs font-semibold uppercase tracking-wider" id="lbl-kpi-target">الهدف الوطني الاستراتيجي</span>
+                    <div class="p-2 bg-cyan-500/10 text-cyan-400 rounded-lg"><i data-lucide="target" class="w-4 h-4"></i></div>
+                </div>
+                <div class="text-2xl font-bold text-white font-mono-num">3,700,000 <span class="text-sm font-sans text-slate-400">م³/يوم</span></div>
+                <p class="text-xs text-slate-400 mt-2" id="sub-kpi-target">البرنامج التكميلي لمواجهة الجفاف 2026</p>
+            </div>
+
+            <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-5">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-slate-400 text-xs font-semibold uppercase tracking-wider" id="lbl-kpi-stations">المحطات المسجلة</span>
+                    <div class="p-2 bg-emerald-500/10 text-emerald-400 rounded-lg"><i data-lucide="building-2" class="w-4 h-4"></i></div>
+                </div>
+                <div class="text-2xl font-bold text-white font-mono-num" id="kpi-station-count">0</div>
+                <p class="text-xs text-emerald-400 mt-2 flex items-center gap-1" id="sub-kpi-stations"><i data-lucide="check-circle" class="w-3 h-3"></i> بيانات معتمدة 100%</p>
+            </div>
+
+            <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-5">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-slate-400 text-xs font-semibold uppercase tracking-wider" id="lbl-kpi-verified">آخر تحديث للبيانات</span>
+                    <div class="p-2 bg-amber-500/10 text-amber-400 rounded-lg"><i data-lucide="shield-check" class="w-4 h-4"></i></div>
+                </div>
+                <div class="text-2xl font-bold text-white" id="kpi-last-update">أكتوبر 2026</div>
+                <p class="text-xs text-slate-400 mt-2" id="sub-kpi-verified">الوكالة الوطنية لتحلية مياه البحر</p>
+            </div>
+        </section>
+
+        <!-- Infographic & Regional Breakdown Section -->
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Infographic Highlights Panel -->
+            <div class="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-xl p-6 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h2 class="text-base font-bold text-white flex items-center gap-2">
+                                <i data-lucide="layout-dashboard" class="w-4 h-4 text-blue-400"></i>
+                                <span id="txt-info-title">لوحة المؤشرات التلخيصية (Infographic Overview)</span>
+                            </h2>
+                            <p class="text-xs text-slate-400" id="txt-info-desc">أبرز مؤشرات البنية التحتية والقدرات الاستراتيجية الوطنية</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 my-4">
+                        <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-4 text-center">
+                            <div class="text-cyan-400 font-bold text-xl font-mono-num mb-1">14</div>
+                            <div class="text-xs text-slate-300 font-medium" id="info-card-1">محطة تحلية نشطة ومبرمجة</div>
+                            <div class="text-[10px] text-slate-500 mt-1">تغطي الساحل الوطني بالكامل</div>
+                        </div>
+                        <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-4 text-center">
+                            <div class="text-emerald-400 font-bold text-xl font-mono-num mb-1">460 ألف</div>
+                            <div class="text-xs text-slate-300 font-medium" id="info-card-2">أكبر طاقة إنتاجية (المقطع)</div>
+                            <div class="text-[10px] text-slate-500 mt-1">بعد عملية إعادة التأهيل الكبرى</div>
+                        </div>
+                        <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-4 text-center">
+                            <div class="text-blue-400 font-bold text-xl font-mono-num mb-1">3 الأقاليم</div>
+                            <div class="text-xs text-slate-300 font-medium" id="info-card-3">الغرب، الوسط، والشرق</div>
+                            <div class="text-[10px] text-slate-500 mt-1">توزيع متوازن لتأمين المياه</div>
+                        </div>
+                    </div>
+
+                    <div class="bg-blue-950/30 border border-blue-500/20 rounded-xl p-4 mt-4 flex items-center gap-3">
+                        <i data-lucide="award" class="w-6 h-6 text-blue-400 shrink-0"></i>
+                        <p class="text-xs text-slate-300" id="txt-info-footer">
+                            تعتمد منظومة "TEC PROCESS" على ربط المؤشرات التقنية ببيانات الاعتماد الرسمية لضمان دقة اتخاذ القرار الهندسي ومحاكاة الأحمال المائية.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Regional Chart Breakdown -->
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 flex flex-col justify-between">
+                <div>
+                    <h2 class="text-base font-bold text-white mb-1 flex items-center gap-2">
+                        <i data-lucide="pie-chart" class="w-4 h-4 text-cyan-400"></i>
+                        <span id="txt-chart-title">التوزيع الإقليمي للإنتاج</span>
+                    </h2>
+                    <p class="text-xs text-slate-400 mb-4" id="txt-chart-desc">نسبة توزيع الطاقة الإنتاجية حسب الأقاليم</p>
+                    <div class="h-52 relative flex items-center justify-center">
+                        <canvas id="regionChart"></canvas>
+                    </div>
+                </div>
+                <div id="chart-legend-custom" class="grid grid-cols-3 gap-2 pt-4 border-t border-slate-800 text-center text-xs font-mono-num"></div>
+            </div>
+        </section>
+
+        <!-- Detailed Engineering Table & Database Search -->
+        <section class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+            <div class="p-5 border-b border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-base font-bold text-white flex items-center gap-2">
+                        <i data-lucide="database" class="w-4 h-4 text-emerald-400"></i>
+                        <span id="txt-table-title">سجل البيانات الهندسي والمصادر المعتمدة</span>
+                    </h2>
+                    <p class="text-xs text-slate-400" id="txt-table-desc">تفاصيل الطاقة، ومصادر الاعتماد من الوكالة الوطنية لتحلية مياه البحر</p>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-3">
+                    <div class="relative flex-1 sm:w-64">
+                        <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute right-3 top-2.5 rtl:right-3 rtl:left-auto ltr:left-3 ltr:right-auto"></i>
+                        <input type="text" id="searchInput" oninput="handleSearch()" placeholder="بحث باسم المحطة أو الولاية..." class="bg-slate-800 border border-slate-700 text-xs text-slate-200 rounded-lg pr-9 pl-3 rtl:pr-9 rtl:pl-3 ltr:pl-9 ltr:pr-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <button onclick="exportCSV(true)" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium px-3 py-2 rounded-lg transition flex items-center gap-1.5" title="تصدير النتائج المفلترة حالياً">
+                            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                            <span id="btn-exp-filtered">تصدير المعروض</span>
+                        </button>
+                        <button onclick="exportCSV(false)" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs font-medium px-3 py-2 rounded-lg transition flex items-center gap-1.5" title="تصدير جميع المحطات">
+                            <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i>
+                            <span id="btn-exp-full">قاعدة البيانات الكاملة</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-right rtl:text-right ltr:text-left text-xs text-slate-300">
+                    <thead class="bg-slate-800/60 text-slate-400 font-semibold uppercase tracking-wider border-b border-slate-800">
+                        <tr>
+                            <th class="px-5 py-3.5" id="th-name">اسم المحطة</th>
+                            <th class="px-5 py-3.5" id="th-wilaya">الولاية / والإقليم</th>
+                            <th class="px-5 py-3.5" id="th-cap">الطاقة التصميمية (م³/يوم)</th>
+                            <th class="px-5 py-3.5" id="th-status">الحالة التشغيلية</th>
+                            <th class="px-5 py-3.5" id="th-source">المصدر المعتمد (الوكالة الوطنية لتحلية مياه البحر)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody" class="divide-y divide-slate-800/60 font-sans"></tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 border-t border-slate-800 mt-8 py-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs text-slate-500 space-y-2">
+            <p>© 2026 TEC PROCESS — Water Intelligence System. جميع الحقوق محفوظة.</p>
+            <p class="text-slate-600 text-[11px]">
+                تنويه قانوني: المنصة هي مشروع تحليلي مستقل مخصص لعرض البيانات الهندسية والمؤشرات بناءً على بيانات الوكالة الوطنية لتحلية مياه البحر.
+            </p>
+        </div>
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        const plantsData = [
+            { id: 1, name: { ar: 'محطة المقطع (إعادة تأهيل)', fr: 'STAP Magtaa (Réhabilitée)', en: 'Magtaa SWRO (Rehabilitated)' }, wilaya: { ar: 'وهران', fr: 'Oran', en: 'Oran' }, region: 'West', capacity: 460000, status: 'operational', source: 'الوكالة الوطنية لتحلية مياه البحر' },
+            { id: 2, name: { ar: 'محطة كاب جنات 2', fr: 'Cap Djinet 2 SWRO', en: 'Cap Djinet 2 SWRO' }, wilaya: { ar: 'بومرداس', fr: 'Boumerdès', en: 'Boumerdes' }, region: 'Center', capacity: 300000, status: 'operational', source: 'الوكالة الوطنية لتحلية مياه البحر' },
+            { id: 3, name: { ar: 'محطة فوكا 2', fr: 'Fouka 2 SWRO', en: 'Fouka 2 SWRO' }, wilaya: { ar: 'تيبازة', fr: 'Tipaza', en: 'Tipaza' }, region: 'Center', capacity: 300000, status: 'operational', source: 'الوكالة الوطنية لتحلية مياه البحر' },
+            { id: 4, name: { ar: 'محطة الحناية / سوق الثلاثاء', fr: 'Souk Tleta SWRO', en: 'Souk Tleta SWRO' }, wilaya: { ar: 'تلمسان', fr: 'Tlemcen', en: 'Tlemcen' }, region: 'West', capacity: 200000, status: 'operational', source: 'الوكالة الوطنية لتحلية مياه البحر' },
+            { id: 5, name: { ar: 'محطة تيغرمت (بجاية)', fr: 'Tighremt SWRO (Béjaïa)', en: 'Tighremt SWRO (Béjaïa)' }, wilaya: { ar: 'بجاية', fr: 'Béjaïa', en: 'Béjaïa' }, region: 'East', capacity: 300000, status: 'operational', source: 'الوكالة الوطنية لتحلية مياه البحر' },
+            { id: 6, name: { ar: 'محطة كاف العصافير (الطارف)', fr: 'Khaf Assafir SWRO (El Tarf)', en: 'Khaf Assafir SWRO (El Tarf)' }, wilaya: { ar: 'الطارف', fr: 'El Tarf', en: 'El Tarf' }, region: 'East', capacity: 300000, status: 'operational', source: 'الوكالة الوطنية لتحلية مياه البحر' },
+            { id: 7, name: { ar: 'محطة رأس الأبيض (وهران)', fr: 'Cap Blanc SWRO', en: 'Cap Blanc SWRO' }, wilaya: { ar: 'وهران', fr: 'Oran', en: 'Oran' }, region: 'West', capacity: 300000, status: 'operational', source: 'الوكالة الوطنية لتحلية مياه البحر' },
+            { id: 8, name: { ar: 'محطة كاب جنات القديمة', fr: 'Cap Djinet 1', en: 'Cap Djinet 1' }, wilaya: { ar: 'بومرداس', fr: 'Boumerdès', en: 'Boumerdes' }, region: 'Center', capacity: 100000, status: 'operational', source: 'الوكالة الوطنية لتحلية مياه البحر' },
+            { id: 9, name: { ar: 'محطة الحامة (الجزائر العاصمة)', fr: 'Hamma SWRO', en: 'Hamma SWRO' }, wilaya: { ar: 'الجزائر', fr: 'Alger', en: 'Algiers' }, region: 'Center', capacity: 200000, status: 'operational', source: 'الوكالة الوطنية لتحلية مياه البحر' },
+            { id: 10, name: { ar: 'محطة الشط الكبيرة (مستغانم)', fr: 'Mostaganem SWRO', en: 'Mostaganem SWRO' }, wilaya: { ar: 'مستغانم', fr: 'Mostaganem', en: 'Mostaganem' }, region: 'West', capacity: 200000, status: 'operational', source: 'الوكالة الوطنية لتحلية مياه البحر' },
+            { id: 11, name: { ar: 'محطة الشاطئ الأزرق (تيبازة)', fr: 'Plage Bleue SWRO', en: 'Plage Bleue SWRO' }, wilaya: { ar: 'تيبازة', fr: 'Tipaza', en: 'Tipaza' }, region: 'Center', capacity: 100000, status: 'operational', source: 'الوكالة الوطنية لتحلية مياه البحر' },
+            { id: 12, name: { ar: 'محطة بني صاف (عين تموشنت)', fr: 'Beni Saf SWRO', en: 'Beni Saf SWRO' }, wilaya: { ar: 'عين تموشنت', fr: 'Aïn Témouchent', en: 'Ain Temouchent' }, region: 'West', capacity: 200000, status: 'operational', source: 'الوكالة الوطنية لتحلية مياه البحر' },
+            { id: 13, name: { ar: 'محطة القليعة / فوكا 1', fr: 'Fouka 1 SWRO', en: 'Fouka 1 SWRO' }, wilaya: { ar: 'تيبازة', fr: 'Tipaza', en: 'Tipaza' }, region: 'Center', capacity: 120000, status: 'operational', source: 'الوكالة الوطنية لتحلية مياه البحر' },
+            { id: 14, name: { ar: 'محطة الشط (الطارف 1)', fr: 'Echatt SWRO', en: 'Echatt SWRO' }, wilaya: { ar: 'الطارف', fr: 'El Tarf', en: 'El Tarf' }, region: 'East', capacity: 50000, status: 'operational', source: 'الوكالة الوطنية لتحلية مياه البحر' }
+        ];
+
+        const translations = {
+            ar: {
+                subtitle: 'المنصة التحليلية المستقلة لمراقبة محطات تحلية مياه البحر بالجزائر',
+                sysActive: 'بيانات معتمدة (2026)',
+                disclaimerTitle: 'مشروع نموذج أولي (Prototype Label Startup):',
+                disclaimerBody: ' هذه المنصة هي أداة رقمية تحليلية نمطية لتجميع ومقارنة مؤشرات أداء المحطات الوطنية بناءً على سجلات الوكالة الوطنية لتحلية مياه البحر، ومعدة للعرض الفني.',
+                kpiTotal: 'الطاقة التشغيلية الإجمالية',
+                kpiTarget: 'الهدف الوطني الاستراتيجي',
+                kpiStations: 'المحطات المسجلة',
+                kpiVerified: 'آخر تحديث للبيانات',
+                subTotal: 'محسوبة تلقائياً من سجلات الوكالة',
+                subTarget: 'البرنامج التكميلي لمواجهة الجفاف 2026',
+                subStations: 'بيانات معتمدة 100%',
+                subVerified: 'الوكالة الوطنية لتحلية مياه البحر',
+                infoTitle: 'لوحة المؤشرات التلخيصية (Infographic Overview)',
+                infoDesc: 'أبرز مؤشرات البنية التحتية والقدرات الاستراتيجية الوطنية',
+                infoCard1: 'محطة تحلية نشطة ومبرمجة',
+                infoCard2: 'أكبر طاقة إنتاجية (المقطع)',
+                infoCard3: 'الغرب، الوسط، والشرق',
+                infoFooter: 'تعتمد منظومة "TEC PROCESS" على ربط المؤشرات التقنية ببيانات الاعتماد الرسمية لضمان دقة اتخاذ القرار الهندسي ومحاكاة الأحمال المائية.',
+                chartTitle: 'التوزيع الإقليمي للإنتاج',
+                chartDesc: 'نسبة توزيع الطاقة الإنتاجية حسب الأقاليم',
+                tableTitle: 'سجل البيانات الهندسي والمصادر المعتمدة',
+                tableDesc: 'تفاصيل الطاقة، ومصادر الاعتماد من الوكالة الوطنية لتحلية مياه البحر',
+                searchPlaceholder: 'بحث باسم المحطة أو الولاية...',
+                expFiltered: 'تصدير المعروض',
+                expFull: 'قاعدة البيانات الكاملة',
+                thName: 'اسم المحطة',
+                thWilaya: 'الولاية / الإقليم',
+                thCap: 'الطاقة التصميمية (م³/يوم)',
+                thStatus: 'الحالة التشغيلية',
+                thSource: 'المصدر المعتمد (الوكالة الوطنية لتحلية مياه البحر)',
+                West: 'الغرب', Center: 'الوسط', East: 'الشرق',
+                statusOperational: 'قيد التشغيل', statusMaint: 'صيانة / تجديد'
+            },
+            fr: {
+                subtitle: "Plateforme analytique indépendante des stations de dessalement en Algérie",
+                sysActive: 'Données certifiées (2026)',
+                disclaimerTitle: 'Prototype Label Startup:',
+                disclaimerBody: " Cette plateforme est un outil analytique modulaire pour comparer les indicateurs de performance des stations nationales sur la base des registres officiels.",
+                kpiTotal: 'Capacité Opérationnelle Totale',
+                kpiTarget: 'Objectif National Stratégique',
+                kpiStations: 'Stations Enregistrées',
+                kpiVerified: 'Dernière Mise à Jour',
+                subTotal: 'Calculé automatiquement à partir des registres',
+                subTarget: 'Programme complémentaire dessalement 2026',
+                subStations: 'Données 100% certifiées',
+                subVerified: 'Agence Nationale de Dessalement',
+                infoTitle: "Aperçu Infographique des Indicateurs",
+                infoDesc: "Indicateurs clés des infrastructures et capacités nationales",
+                infoCard1: 'Stations actives et programmées',
+                infoCard2: 'Plus grande capacité (Magtaa)',
+                infoCard3: 'Ouest, Centre et Est',
+                infoFooter: "La plateforme 'TEC PROCESS' lie les indicateurs techniques aux données officielles de certification pour garantir la précision de la décision.",
+                chartTitle: 'Répartition Régionale de la Production',
+                chartDesc: 'Distribution de la capacité par région géographique',
+                tableTitle: 'Registre Technique et Sources Certifiées',
+                tableDesc: 'Capacités et traçabilité officielle de l’Agence Nationale',
+                searchPlaceholder: 'Rechercher par station ou wilaya...',
+                expFiltered: 'Exporter Filtré',
+                expFull: 'Base de Données',
+                thName: 'Nom de la Station',
+                thWilaya: 'Wilaya / Région',
+                thCap: 'Capacité (m³/j)',
+                thStatus: 'Statut',
+                thSource: 'Source Certifiée',
+                West: 'Ouest', Center: 'Centre', East: 'Est',
+                statusOperational: 'Opérationnelle', statusMaint: 'Maintenance'
+            },
+            en: {
+                subtitle: 'Independent Analytical Platform for Algeria Desalination Infrastructure',
+                sysActive: 'Certified Data (2026)',
+                disclaimerTitle: 'Label Startup Prototype:',
+                disclaimerBody: ' This platform is an analytical tool benchmarking national SWRO desalination performance metrics based on official records.',
+                kpiTotal: 'Total Operational Capacity',
+                kpiTarget: 'National Strategic Target',
+                kpiStations: 'Registered Plants',
+                kpiVerified: 'Data Last Verified',
+                subTotal: 'Dynamically calculated from official plant logs',
+                subTarget: 'National drought emergency plan target 2026',
+                subStations: '100% Certified records',
+                subVerified: 'National Desalination Agency',
+                infoTitle: 'Infographic Overview Panel',
+                infoDesc: 'Key infrastructure indicators and national strategic capacities',
+                infoCard1: 'Active and programmed plants',
+                infoCard2: 'Largest capacity (Magtaa)',
+                infoCard3: 'West, Center, and East',
+                infoFooter: "'TEC PROCESS' links technical indicators with official certification data to ensure precise engineering decisions and water load simulation.",
+                chartTitle: 'Regional Production Distribution',
+                chartDesc: 'Percentage breakdown of design capacity by region',
+                tableTitle: 'Engineering Registry & Certified Sources',
+                tableDesc: 'Capacity ratings and official audit logs from the National Agency',
+                searchPlaceholder: 'Search by plant or wilaya...',
+                expFiltered: 'Export Displayed',
+                expFull: 'Full Database',
+                thName: 'Plant Name',
+                thWilaya: 'Wilaya / Region',
+                thCap: 'Design Cap. (m³/d)',
+                thStatus: 'Status',
+                thSource: 'Certified Source',
+                West: 'West', Center: 'Center', East: 'East',
+                statusOperational: 'Operational', statusMaint: 'Maintenance'
+            }
+        };
+
+        let currentLang = 'ar';
+        let searchQuery = '';
+        let chart;
+
+        function formatNumber(num) {
+            return new Intl.NumberFormat().format(num);
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('regionChart').getContext('2d');
+            chart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        data: [],
+                        backgroundColor: ['#3b82f6', '#06b6d4', '#10b981'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '72%',
+                    plugins: { legend: { display: false } }
+                }
+            });
+            updateChart();
+        }
+
+        function updateChart() {
+            const data = getFilteredData();
+            const regions = { West: 0, Center: 0, East: 0 };
+            data.forEach(p => { regions[p.region] += p.capacity; });
+
+            const regionNames = {
+                West: translations[currentLang].West,
+                Center: translations[currentLang].Center,
+                East: translations[currentLang].East
+            };
+
+            chart.data.labels = Object.keys(regions).map(r => regionNames[r]);
+            chart.data.datasets[0].data = Object.values(regions);
+            chart.update();
+
+            const legendDiv = document.getElementById('chart-legend-custom');
+            const total = Object.values(regions).reduce((a, b) => a + b, 0) || 1;
+            
+            legendDiv.innerHTML = `
+                <div>
+                    <div class="text-blue-400 font-bold">${((regions.West/total)*100).toFixed(1)}%</div>
+                    <div class="text-slate-400 text-[10px]">${regionNames.West}</div>
+                </div>
+                <div>
+                    <div class="text-cyan-400 font-bold">${((regions.Center/total)*100).toFixed(1)}%</div>
+                    <div class="text-slate-400 text-[10px]">${regionNames.Center}</div>
+                </div>
+                <div>
+                    <div class="text-emerald-400 font-bold">${((regions.East/total)*100).toFixed(1)}%</div>
+                    <div class="text-slate-400 text-[10px]">${regionNames.East}</div>
+                </div>
+            `;
+        }
+
+        function getFilteredData() {
+            return plantsData.filter(plant => {
+                const query = searchQuery.toLowerCase();
+                return plant.name[currentLang].toLowerCase().includes(query) || 
+                       plant.wilaya[currentLang].toLowerCase().includes(query) ||
+                       plant.source.toLowerCase().includes(query);
+            });
+        }
+
+        function updateTableAndMetrics() {
+            const data = getFilteredData();
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            const totalCap = data.reduce((acc, p) => acc + p.capacity, 0);
+            document.getElementById('kpi-total-capacity').innerHTML = `${formatNumber(totalCap)} <span class="text-sm font-sans text-slate-400">م³/يوم</span>`;
+            document.getElementById('kpi-station-count').innerText = data.length;
+
+            data.forEach(p => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-800/40 transition border-b border-slate-800/40';
+
+                const statusTag = p.status === 'operational' 
+                    ? `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">${translations[currentLang].statusOperational}</span>`
+                    : `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20">${translations[currentLang].statusMaint}</span>`;
+
+                tr.innerHTML = `
+                    <td class="px-5 py-3.5 font-bold text-white flex items-center gap-2">
+                        <i data-lucide="droplet" class="w-3.5 h-3.5 text-blue-400"></i>
+                        ${p.name[currentLang]}
+                    </td>
+                    <td class="px-5 py-3.5 text-slate-300">${p.wilaya[currentLang]} (${translations[currentLang][p.region]})</td>
+                    <td class="px-5 py-3.5 font-mono-num font-bold text-blue-400">${formatNumber(p.capacity)}</td>
+                    <td class="px-5 py-3.5">${statusTag}</td>
+                    <td class="px-5 py-3.5 text-slate-400 text-[11px]">${p.source}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            lucide.createIcons();
+            updateChart();
+        }
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            document.documentElement.lang = lang;
+            document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+
+            ['ar', 'fr', 'en'].forEach(l => {
+                const btn = document.getElementById(`lang-${l}`);
+                if (l === lang) {
+                    btn.className = 'px-2.5 py-1 rounded-md transition font-medium bg-blue-600 text-white';
+                } else {
+                    btn.className = 'px-2.5 py-1 rounded-md transition font-medium text-slate-400 hover:text-white';
+                }
+            });
+
+            const t = translations[lang];
+            document.getElementById('txt-subtitle').innerText = t.subtitle;
+            document.getElementById('txt-sys-active').innerText = t.sysActive;
+            document.getElementById('txt-disclaimer-title').innerText = t.disclaimerTitle;
+            document.getElementById('txt-disclaimer-body').innerText = t.disclaimerBody;
+            
+            document.getElementById('lbl-kpi-total').innerText = t.kpiTotal;
+            document.getElementById('lbl-kpi-target').innerText = t.kpiTarget;
+            document.getElementById('lbl-kpi-stations').innerText = t.kpiStations;
+            document.getElementById('lbl-kpi-verified').innerText = t.kpiVerified;
+
+            document.getElementById('sub-kpi-total').innerText = t.subTotal;
+            document.getElementById('sub-kpi-target').innerText = t.subTarget;
+            document.getElementById('sub-kpi-stations').innerText = t.subStations;
+            document.getElementById('sub-kpi-verified').innerText = t.subVerified;
+
+            document.getElementById('txt-info-title').innerText = t.infoTitle;
+            document.getElementById('txt-info-desc').innerText = t.infoDesc;
+            document.getElementById('info-card-1').innerText = t.infoCard1;
+            document.getElementById('info-card-2').innerText = t.infoCard2;
+            document.getElementById('info-card-3').innerText = t.infoCard3;
+            document.getElementById('txt-info-footer').innerText = t.infoFooter;
+
+            document.getElementById('txt-chart-title').innerText = t.chartTitle;
+            document.getElementById('txt-chart-desc').innerText = t.chartDesc;
+
+            document.getElementById('txt-table-title').innerText = t.tableTitle;
+            document.getElementById('txt-table-desc').innerText = t.tableDesc;
+            document.getElementById('searchInput').placeholder = t.searchPlaceholder;
+
+            document.getElementById('btn-exp-filtered').innerText = t.expFiltered;
+            document.getElementById('btn-exp-full').innerText = t.expFull;
+
+            document.getElementById('th-name').innerText = t.thName;
+            document.getElementById('th-wilaya').innerText = t.thWilaya;
+            document.getElementById('th-cap').innerText = t.thCap;
+            document.getElementById('th-status').innerText = t.thStatus;
+            document.getElementById('th-source').innerText = t.thSource;
+
+            updateTableAndMetrics();
+        }
+
+        function handleSearch() {
+            searchQuery = document.getElementById('searchInput').value;
+            updateTableAndMetrics();
+        }
+
+        function exportCSV(filteredOnly = true) {
+            const dataToExport = filteredOnly ? getFilteredData() : plantsData;
+            let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
+            csvContent += "ID,Station Name,Wilaya,Region,Design Capacity (m3/d),Status,Verified Source\n";
+
+            dataToExport.forEach(p => {
+                const name = `"${p.name[currentLang]}"`;
+                const wilaya = `"${p.wilaya[currentLang]}"`;
+                const source = `"${p.source}"`;
+                csvContent += `${p.id},${name},${wilaya},${p.region},${p.capacity},${p.status},${source}\n`;
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `Algeria_Desalination_Plants_${filteredOnly ? 'Filtered' : 'Full'}_2026.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            initChart();
+            updateTableAndMetrics();
+        });
+    </script>
+</body>
+</html>
